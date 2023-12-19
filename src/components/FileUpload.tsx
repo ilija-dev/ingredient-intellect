@@ -3,13 +3,14 @@ import { uploadToS3 } from "@/lib/s3";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { Inbox, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import toast from "react-hot-toast";
 
 const FileUpload = () => {
   const [uploading, setUploading] = useState(false);
-  const { mutate /*isLoading */ } = useMutation({
+  const router = useRouter();
+  const { mutate, isPending } = useMutation({
     mutationFn: async ({
       file_key,
       file_name,
@@ -32,22 +33,24 @@ const FileUpload = () => {
       const file = acceptedFiles[0];
       if (file.size > 10 * 1024 * 1024) {
         //Bigger than 10MBS
-        toast.error("File too large");
+        console.log("File too large");
         return;
       }
       try {
         setUploading(true);
         const data = await uploadToS3(file);
         if (!data?.file_key || !data.file_name) {
-          toast.error("Something went wrong");
+          console.log("Something went wrong");
           return;
         }
         mutate(data, {
-          onSuccess: (data) => {
-            toast.success(data.message);
+          onSuccess: ({ chat_Id }) => {
+            console.log("Chat has been created");
+            router.push(`/chat/${chat_Id}`);
           },
-          onError: (data) => {
-            toast.error("Error creating chat");
+          onError: (error) => {
+            console.log("Error creating chat");
+            console.log(error);
           },
         });
       } catch (error) {
@@ -67,10 +70,17 @@ const FileUpload = () => {
         })}
       >
         <input {...getInputProps()} />
-        <>
-          <Inbox className="w-10 h-10 text-blue-500" />
-          <p className="mt-2 text-sm text-slate-400">Drop PDF Here</p>
-        </>
+        {uploading || isPending ? (
+          <>
+            <Loader2 className="w-10 h-10 text-blue-500" />
+            <p className="mt-2 text-sm text-slate-400">Analyzing PDF...</p>
+          </>
+        ) : (
+          <>
+            <Inbox className="w-10 h-10 text-blue-500" />
+            <p className="mt-2 text-sm text-slate-400">Drop PDF Here</p>
+          </>
+        )}
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ import { LogIn } from "lucide-react";
 import Link from "next/link";
 
 export default async function Home() {
-  const { userId } = await auth();
+  const { userId } = auth();
 
   const isAuth = !!userId;
 
