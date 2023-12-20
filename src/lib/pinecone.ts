@@ -47,7 +47,6 @@ async function embedDocument(doc: Document, fileKey: string) {
       },
     } as PineconeRecord;
   } catch (error) {
-    console.log("Error in embedDocument", error);
     throw error;
   }
 }
@@ -77,31 +76,35 @@ async function prepareDocument(page: PDFPage, fileKey: string) {
 }
 
 export async function loadS3IntoPinecone(fileKey: string) {
-  //Get PDF from S3
-  const file_name = await downloadFromS3(fileKey);
+  try {
+    //Get PDF from S3
+    const file_name = await downloadFromS3(fileKey);
 
-  if (!file_name) throw new Error("Could not download from S3");
-  const loader = new PDFLoader(file_name);
-  const pages = (await loader.load()) as PDFPage[];
-  //Split and segment the PDF
-  const documents = await Promise.all(
-    pages.map((page) => prepareDocument(page, fileKey))
-  );
+    if (!file_name) throw new Error("Could not download from S3");
+    const loader = new PDFLoader(file_name);
+    const pages = (await loader.load()) as PDFPage[];
+    //Split and segment the PDF
+    const documents = await Promise.all(
+      pages.map((page) => prepareDocument(page, fileKey))
+    );
 
-  if (!documents) {
-    console.log("Something went wrong");
-    return;
+    if (!documents) {
+      console.log("Something went wrong");
+      return;
+    }
+
+    //Vectorize and embed individual documents
+    const vectors = await Promise.all(
+      documents.flat().map((doc) => embedDocument(doc!, fileKey))
+    );
+
+    //Upload to Pinecone
+    const client = await getPineconeClient();
+    const pineconeIndex = client.Index(process.env.PINECONE_INDEX_NAME!);
+    pineconeIndex.upsert(vectors);
+
+    return documents[0];
+  } catch (error) {
+    throw error;
   }
-
-  //Vectorize and embed individual documents
-  const vectors = await Promise.all(
-    documents.flat().map((doc) => embedDocument(doc!, fileKey))
-  );
-
-  //Upload to Pinecone
-  const client = await getPineconeClient();
-  const pineconeIndex = client.Index(process.env.PINECONE_INDEX_NAME!);
-  pineconeIndex.upsert(vectors);
-
-  return documents[0];
 }

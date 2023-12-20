@@ -27,7 +27,11 @@ const FileUpload = () => {
   });
 
   const { getRootProps, getInputProps } = useDropzone({
-    accept: { "application/pdf": [".pdf"] },
+    accept: {
+      "image/png": [".png"],
+      "image/jpeg": [".jpeg"],
+      "application/pdf": [".pdf"],
+    },
     maxFiles: 1,
     onDrop: async (acceptedFiles) => {
       const file = acceptedFiles[0];
@@ -50,7 +54,7 @@ const FileUpload = () => {
           },
           onError: (error) => {
             console.log("Error creating chat");
-            console.log(error);
+            console.log("Reason", error.message);
           },
         });
       } catch (error) {
