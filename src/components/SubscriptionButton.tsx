@@ -3,7 +3,10 @@ import React, { useState } from "react";
 import { Button } from "./ui/button";
 import axios from "axios";
 
-const SubscriptionButton = () => {
+type Props = {
+  isPro: boolean;
+};
+const SubscriptionButton = (props: Props) => {
   const [loading, setLoading] = useState(false);
 
   const handleSubscription = async () => {
@@ -19,11 +22,11 @@ const SubscriptionButton = () => {
   };
   return (
     <Button
-      className="mt-2 text-white bg-slate-700"
+      className="mt-2 text-white"
       disabled={loading}
       onClick={handleSubscription}
     >
-      Upgrade to Pro
+      {props.isPro ? "Manage subscriptions" : "Upgrade to Pro"}
     </Button>
   );
 };
