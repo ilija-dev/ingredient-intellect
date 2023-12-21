@@ -27,7 +27,7 @@ export async function uploadToS3(file: File) {
           file_key.replace(/\.(png|jpeg)$/i, ".pdf"),
           file
         );
-        file = result;
+        //file = result;
       } catch (error) {
         console.log(error);
         throw error;
@@ -68,32 +68,24 @@ export function getS3Url(file_key: string) {
   return url;
 }
 
-async function convertImageToPDF(
-  file_key: string,
-  { name }: File
-): Promise<File> {
-  const doc = new PDFDocument();
-  const buffers: Buffer[] = [];
-
-  const imageBuffer = await sharp(name).toBuffer();
-  const imageWidth = 500;
-
-  doc.image(imageBuffer, 0, 0, { width: imageWidth });
-  doc.end();
-
-  doc.on("data", (chunk) => {
-    buffers.push(chunk);
-  });
-
-  return new Promise<File>((resolve) => {
-    doc.on("end", () => {
-      const pdfBuffer = Buffer.concat(buffers);
-
-      const file = new File([pdfBuffer], `${file_key}.pdf`, {
-        type: "application/pdf",
-      });
-
-      resolve(file);
-    });
-  });
+//TO-DO: FIX
+async function convertImageToPDF(file_key: string, { name }: File) {
+  // const doc = new PDFDocument();
+  // const buffers: Buffer[] = [];
+  // const imageBuffer = await sharp(name).toBuffer();
+  // const imageWidth = 500;
+  // doc.image(imageBuffer, 0, 0, { width: imageWidth });
+  // doc.end();
+  // doc.on("data", (chunk) => {
+  //   buffers.push(chunk);
+  // });
+  // return new Promise<File>((resolve) => {
+  //   doc.on("end", () => {
+  //     const pdfBuffer = Buffer.concat(buffers);
+  //     const file = new File([pdfBuffer], `${file_key}.pdf`, {
+  //       type: "application/pdf",
+  //     });
+  //     resolve(file);
+  //   });
+  // });
 }

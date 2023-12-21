@@ -1,5 +1,8 @@
+import ChatComponent from "@/components/ChatComponent";
+import ChatSideBar from "@/components/ChatSideBar";
+import PDFViewer from "@/components/PDFViewer";
 import { db } from "@/lib/db";
-import { chats as chat_schema } from "@/lib/db/schema";
+import { chats } from "@/lib/db/schema";
 import { auth } from "@clerk/nextjs";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
@@ -12,35 +15,33 @@ type Props = {
 };
 
 const ChatPage = async ({ params: { chatId } }: Props) => {
-  const { userId } = auth();
+  const { userId } = await auth();
   if (!userId) {
     return redirect("/sign-in");
   }
+  const _chats = await db.select().from(chats).where(eq(chats.userId, userId));
+  const currentChat = _chats.find((chat) => chat.id === parseInt(chatId));
+  // if (!_chats) {
+  //   return redirect("/");
+  // }
+  // if (!currentChat) {
+  //   return redirect("/");
+  // }
 
-  const chats = await db
-    .select()
-    .from(chat_schema)
-    .where(eq(chat_schema.userId, userId));
-
-  if (!chats) {
-    return redirect("/");
-  }
-
-  if (!chats.find((chat) => chat.id === parseInt(chatId))) {
-    return redirect("/");
-  }
   return (
     <div className="flex max-h-screen overflow-scroll">
       <div className="flex w-full max-h-screen overflow-scroll">
         {/* chat sidebar */}
-        <div className="flex-[1] max-w-xs">{/* <ChatSideBar/> */}</div>
+        <div className="flex-[1] max-w-xs">
+          <ChatSideBar chatId={parseInt(chatId)} chats={_chats} />
+        </div>
         {/* pdf viewer */}
         <div className="max-h-screen p-4 overflow-scroll flex-[5]">
-          {/* <PDFViewer/> */}
+          <PDFViewer pdf_url={currentChat?.pdfUrl || ""} />
         </div>
         {/* chat component */}
         <div className="flex-[3] border-l-4 border-l-slate-200">
-          {/* ChatComponent */}
+          <ChatComponent chatId={parseInt(chatId)} />
         </div>
       </div>
     </div>

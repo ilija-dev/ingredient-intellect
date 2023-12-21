@@ -2,9 +2,6 @@
   "name": "ingredient-intellect",
   "version": "0.1.0",
   "private": true,
-  "browser": {
-    "fs": "empty"
-  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -19,6 +16,7 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@tanstack/react-query": "^5.13.4",
     "@types/md5": "^2.3.5",
+    "ai": "^2.2.29",
     "aws-sdk": "^2.1516.0",
     "axios": "^1.6.2",
     "class-variance-authority": "^0.7.0",
@@ -38,6 +36,7 @@
     "react-dom": "^18",
     "react-dropzone": "^14.2.3",
     "sharp": "^0.33.1",
+    "stripe": "^14.9.0",
     "tailwind-merge": "^2.1.0",
     "tailwindcss-animate": "^1.0.7"
   },
@@ -52,5 +51,10 @@
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
+  },
+  "browser": {
+    "fs": false,
+    "os": false,
+    "path": false
   }
 }
